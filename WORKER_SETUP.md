@@ -1,6 +1,6 @@
-# GTD Task DB 連携（導入前）
+# GTD Task DB 連携
 
-このリポジトリは公開です。Notion APIトークン、Cloudflareの保存キー、Accessの秘密情報はGitHubへ入れません。
+このリポジトリは公開です。Notion APIトークンと接続キーはGitHubへ入れません。
 
 ## 連携対象
 
@@ -17,13 +17,15 @@
 2. Settings → Variables and Secretsで次を登録する。
    - Secret `NOTION_TOKEN`: 新しいGTD Task DBだけに共有したNotion内部インテグレーショントークン
    - Variable `NOTION_DATABASE_ID`: `454df338bb434c6390acba717f615323`
-3. Workerの `/tasks` と `/log` にCloudflare Accessを設定する。Accessの認証が済んだリクエストには `CF-Access-Jwt-Assertion` が付くため、公開HTMLへキーを置かずに済む。
-4. Accessを使わない暫定検証時だけ、Worker側にSecret `LOG_WRITE_KEY`を登録するとBearer認証へ切り替わる。ただし公開HTMLへこのキーを埋め込まないこと。
-5. 公開タイマーの「Notion連携設定」にWorker URLを入力する。
+   - Secret `LOG_WRITE_KEY`: 十分に長いランダムな接続キー
+3. Notion埋め込みではCloudflare Accessの認証Cookieが第三者Cookieとして遮断される場合があるため、WorkerへのAccess保護は解除し、Worker自身のBearer認証を使う。
+4. 公開タイマーの「Notion連携設定」にWorker URLと接続キーを入力する。接続キーは公開HTMLへ埋め込まず、利用者がブラウザへ入力する。
+5. 共用端末では「この端末に接続キーを保存する」をオンにしない。オフの場合はタブを閉じるまでの保存になる。
 
 ## 未完了の点
 
-- このWorkerはまだデプロイ・認証設定されていないため、現時点でNotionへの実書き込みは未検証。
+- Task DBの読み込みは、Workerのデプロイ・接続キー設定後に実画面で確認する。
+- Notionへの実書き込みはTask DBの値を変更するため、読み込み確認とは分けて明示的にテストする。
 - Notion APIの再送時に完全な重複排除を行う識別子フィールドはTask DBにない。通信失敗時はローカル履歴とTask DBの作業時間を照合する。
 - Task DBの公開HTML側へのトークン埋め込みは行っていない。
 
