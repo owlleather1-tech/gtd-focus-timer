@@ -8,7 +8,7 @@ function safeEqual(a,b){if(typeof a!=="string"||typeof b!=="string")return false
 function textProp(p){return p?.title?.map(x=>x.plain_text||x.text?.content||'').join('')||p?.rich_text?.map(x=>x.plain_text||x.text?.content||'').join('')||''}
 function pageUrl(id){return `https://www.notion.so/${String(id).replaceAll('-','')}`}
 function pageId(value){const m=String(value||'').match(/[0-9a-f]{32}/i);return m?m[0]:String(value||'').replaceAll('-','')}
-async function notion(env,path,init={}){return fetch(`https://api.notion.com/v1${path}`,{...init,headers:{Authorization:`Bearer ${env.NOTION_TOKEN}`,"Notion-Version":"2026-03-11","Content-Type":"application/json",...(init.headers||{})}})}
+async function notion(env,path,init={}){const token=String(env.NOTION_TOKEN||'').trim();return fetch(`https://api.notion.com/v1${path}`,{...init,headers:{Authorization:`Bearer ${token}`,"Notion-Version":"2026-03-11","Content-Type":"application/json",...(init.headers||{})}})}
 function authOk(req,env){if(env.LOG_WRITE_KEY){const h=req.headers.get('Authorization')||'';return safeEqual(h,'Bearer '+env.LOG_WRITE_KEY)}return Boolean(req.headers.get('CF-Access-Jwt-Assertion'))}
 export default {async fetch(req,env){
  const origin=req.headers.get('Origin'),originAllowed=origin===ORIGIN;
