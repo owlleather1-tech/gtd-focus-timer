@@ -59,7 +59,7 @@ const K='gtd-timer-v2',H='gtd-timer-history-v2',API='gtd-timer-api-v1',$=id=>doc
 let s;try{s=JSON.parse(localStorage.getItem(K))}catch{};s=s&&typeof s==='object'?s:{mode:'idle',elapsed:0,startedAt:null,task:'',taskId:'',next:'',link:''};
 if(!['idle','running','paused'].includes(s.mode))s.mode='idle';if(!Number.isFinite(s.elapsed)||s.elapsed<0)s.elapsed=0;
 if(s.mode==='running'&&!Number.isFinite(s.startedAt))s.mode='paused';let hist=[];try{let x=JSON.parse(localStorage.getItem(H));if(Array.isArray(x))hist=x}catch{};
-$('task').value=s.task||'';$('next').value=s.next||'';$('link').value=s.link||'';$('api').value=localStorage.getItem(API)||'';
+$('task').value=s.task||'';$('next').value=s.next||'';$('link').value=s.link||'';$('api').value=localStorage.getItem(API)||'https://gtd-focus-timer-api.owlleather1.workers.dev';
 function save(){s.task=$('task').value;s.next=$('next').value;s.link=$('link').value;localStorage.setItem(K,JSON.stringify(s));localStorage.setItem(API,$('api').value.trim())}
 function seconds(){return Math.floor((s.elapsed+(s.mode==='running'?Math.max(0,now()-s.startedAt):0))/1000)}
 function fmt(t){return [Math.floor(t/3600),Math.floor(t%3600/60),t%60].map(n=>String(n).padStart(2,'0')).join(':')}
