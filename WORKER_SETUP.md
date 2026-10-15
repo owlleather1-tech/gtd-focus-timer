@@ -1,29 +1,29 @@
-# GTD Work Log 自動保存API（導入前）
+# GTD Task DB 連携（導入前）
 
-このリポジトリは公開です。**Notion APIキーと保存用認証キーは絶対にコミットしないでください。**
+このリポジトリは公開です。Notion APIトークン、Cloudflareの保存キー、Accessの秘密情報はGitHubへ入れません。
 
-## 1. Cloudflare Workersを作成
-Cloudflareダッシュボード → Workers & Pages → Create → Worker。新しいWorkerを作り、`worker.js` のコードを貼り付けてデプロイ。
+## 連携対象
 
-## 2. Workerの設定
-Settings → Variables and Secretsで以下を登録。
-- Secret `NOTION_TOKEN`: Notionの内部インテグレーショントークン。GitHubには書かない。
-- Secret `LOG_WRITE_KEY`: 32文字以上のランダムな長いキー。Notionのトークンとは別にする。
-- Variable `NOTION_DATABASE_ID`: 新規GTD Work Log DBのID `fb53b02872004237ae3abe95a849750c`。
+- Notionデータベース: `GTD Task DB`
+- Database ID: `454df338bb434c6390acba717f615323`
+- Data source: `collection://faf488e6-adf6-4b4b-ab4d-b07ca58ae4c8`
+- 旧DB・旧ダッシュボードは対象外
 
-Notionの接続設定で、この新規DBだけをインテグレーションに共有すること。旧DBは共有しない。
+タイマーは、Task DBから未完了タスクを読み込み、完了時に対象タスクの「所要時間（分）」へ加算し、「再開メモ」へ作業ログを追記します。「進行状況」は開始・記録時に「進行中」へ更新します。タイマーの「完了」は作業セッションの完了であり、Notionタスク自体を自動で「完了」にはしません。
 
-## 3. API
-`POST https://<your-worker>.workers.dev/log`
-Headers: `Origin: https://owlleather1-tech.github.io`（ブラウザが送信）、`Authorization: Bearer <LOG_WRITE_KEY>`、`Content-Type: application/json`
-Body:
-```json
-{"task":"レンズ磨き","start":"2026-10-13T01:00:00.000Z","end":"2026-10-13T01:05:00.000Z","minutes":5,"note":"前玉確認","taskUrl":""}
-```
-201で成功、401で認証失敗、502でNotion書込失敗。
+## Cloudflare Worker
 
-## 注意
-- このAPIはまだデプロイしていません。現行タイマーはブラウザ内履歴とCSV保存のままです。
-- この設計は個人用の簡易認証です。保存キーをブラウザに入れる運用は漏えいリスクがあり、共有端末には不向きです。将来はCloudflare Access等のユーザー認証に切り替えてください。
-- CORSのOrigin検査だけでは認証にはなりません。Bearerキーも必要です。
-- Notion APIは一時的に失敗する場合があるため、成功応答までローカル履歴を消さないこと。重複登録防止は今後の課題です。
+1. CloudflareダッシュボードでWorkerを作成し、`worker.js`をデプロイする。
+2. Settings → Variables and Secretsで次を登録する。
+   - Secret `NOTION_TOKEN`: 新しいGTD Task DBだけに共有したNotion内部インテグレーショントークン
+   - Variable `NOTION_DATABASE_ID`: `454df338bb434c6390acba717f615323`
+3. Workerの `/tasks` と `/log` にCloudflare Accessを設定する。Accessの認証が済んだリクエストには `CF-Access-Jwt-Assertion` が付くため、公開HTMLへキーを置かずに済む。
+4. Accessを使わない暫定検証時だけ、Worker側にSecret `LOG_WRITE_KEY`を登録するとBearer認証へ切り替わる。ただし公開HTMLへこのキーを埋め込まないこと。
+5. 公開タイマーの「Notion連携設定」にWorker URLを入力する。
+
+## 未完了の点
+
+- このWorkerはまだデプロイ・認証設定されていないため、現時点でNotionへの実書き込みは未検証。
+- Notion APIの再送時に完全な重複排除を行う識別子フィールドはTask DBにない。通信失敗時はローカル履歴とTask DBの作業時間を照合する。
+- Task DBの公開HTML側へのトークン埋め込みは行っていない。
+
