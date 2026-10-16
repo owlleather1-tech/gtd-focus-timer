@@ -1,88 +1,14 @@
 <!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>GTD 集中タイマー</title>
-  <style>
-    :root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#f2f5ed;background:#081b15}
-    *{box-sizing:border-box}
-    body{margin:0;padding:12px}
-    .app{max-width:520px;margin:auto;background:#122b23;padding:16px;border-radius:16px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    h1{font-size:18px;margin:0} p{margin:8px 0;color:#b8c8bd}
-    label{display:block;margin:10px 0 5px;font-weight:700;font-size:13px}
-    select,input,textarea{width:100%;background:#081b15;border:1px solid #61776b;color:#fff;padding:10px;border-radius:8px;font:inherit}
-    textarea{min-height:64px;resize:vertical}
-    .task-row{display:flex;gap:7px;align-items:end}.task-row>div{flex:1}
-    button{background:#b9ef72;color:#102015;border:0;border-radius:8px;padding:10px 13px;font-weight:700;cursor:pointer;white-space:nowrap}
-    button.secondary{background:#365247;color:#f2f5ed}.buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:14px 0 8px}
-    button:disabled{opacity:.4;cursor:default}.compact{margin-top:12px}
-    #clock{text-align:center;font-size:clamp(48px,16vw,76px);font-weight:800;line-height:1.05;font-variant-numeric:tabular-nums;margin:16px 0 2px}
-    #state{text-align:center;color:#b9ef72;font-size:13px}.hint{font-size:12px;line-height:1.5}
-    details{border-top:1px solid #365247;margin-top:12px;padding-top:10px}summary{cursor:pointer;font-weight:700;font-size:13px}
-    #notice{min-height:1.4em;color:#b9ef72;font-size:12px}.history-wrap{overflow:auto;max-height:180px}
-    table{width:100%;font-size:12px;border-collapse:collapse}td,th{border-bottom:1px solid #365247;text-align:left;padding:6px 4px;white-space:nowrap}
-    .status{font-size:12px;color:#b8c8bd}.hidden{display:none}
-    .remember{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:400}.remember input{width:auto}
-  </style>
-</head>
-<body>
-<main class="app">
-  <header><h1>⏱ GTD 集中タイマー</h1><span class="status" id="apiState">ローカル保存</span></header>
-  <div class="compact">
-    <label for="taskSelect">取り組むタスク</label>
-    <div class="task-row"><div><select id="taskSelect"><option value="">手入力またはタスクを読み込む</option></select></div><button class="secondary" id="loadTasks" type="button">読み込む</button></div>
-    <div id="clock">00:00:00</div><div id="state">待機中</div>
-    <div class="buttons"><button id="start">▶ 開始</button><button id="pause">Ⅱ 中断</button><button id="resume">↻ 再開</button><button id="finish">✓ 記録</button><button class="secondary" id="reset">リセット</button></div>
-    <p class="hint" id="recordGuide">①タスクを選択 → ②開始 → ③記録</p>
-  </div>
-  <p id="notice" role="status"></p>
-  <details>
-    <summary>タスク詳細・再開メモ</summary>
-    <label for="task">タスク名（手入力）</label><input id="task" maxlength="160" placeholder="例：レンズ磨き">
-    <label for="next">次の一手・再開メモ</label><textarea id="next" placeholder="例：次は前玉の状態を確認"></textarea>
-    <label for="link">関連タスクURL（任意）</label><input id="link" type="url" placeholder="https://www.notion.so/...">
-  </details>
-  <details>
-    <summary>Notion連携設定</summary>
-    <p class="hint">NotionトークンはCloudflare側だけに保存され、この公開ページには入りません。Task DBへ接続するための専用キーを入力してください。</p>
-    <label for="api">Worker URL（例：workers.devのベースURL）</label><input id="api" type="url" placeholder="https://your-worker.workers.dev">
-    <label for="apiKey">接続キー</label><input id="apiKey" type="password" autocomplete="off" placeholder="Cloudflareに登録した専用キー">
-    <label class="remember"><input id="rememberKey" type="checkbox">この端末に接続キーを保存する</label>
-  </details>
-  <details>
-    <summary>作業履歴</summary>
-    <button class="secondary" id="csv" type="button">CSVを書き出す</button>
-    <div class="history-wrap"><table><thead><tr><th>終了日時</th><th>タスク</th><th>時間</th><th>再開メモ</th></tr></thead><tbody id="history"></tbody></table></div>
-  </details>
-</main>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GTD ミニタイマー</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#f2f5ed;background:#122b23}*{box-sizing:border-box}body{margin:0;padding:8px}.timer{max-width:460px;margin:auto;border-radius:12px;padding:10px 12px;background:#122b23}header{display:flex;align-items:center;justify-content:space-between;gap:8px}h1{font-size:14px;margin:0;font-weight:650}#clock{font-size:clamp(32px,9vw,45px);font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.01em}#state{font-size:11px;color:#b9ef72}.actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}button{background:#b9ef72;color:#102015;border:0;border-radius:7px;padding:9px 12px;font:600 13px system-ui;cursor:pointer;min-height:38px}button.secondary{background:#365247;color:#f2f5ed}button:disabled{opacity:.35;cursor:default}#notice{font-size:12px;min-height:1.2em;margin:6px 0 0;color:#b9ef72}#result{display:none;background:#081b15;border-radius:8px;padding:9px;margin-top:8px;align-items:center;justify-content:space-between;gap:8px}#result strong{font-size:20px}details{margin-top:8px;border-top:1px solid #365247;padding-top:8px}summary{font-size:12px;color:#b8c8bd;cursor:pointer}small{color:#b8c8bd}label{display:block;font-size:12px;margin:8px 0 4px}input{background:#081b15;border:1px solid #61776b;border-radius:6px;color:#fff;padding:8px;width:100%;font:inherit}
+</style></head><body><main class="timer"><header><h1>⏱ 集中タイマー</h1><span id="state">待機中</span></header><div id="clock">00:00:00</div><div class="actions"><button id="start">▶ 開始</button><button id="pause" class="secondary">Ⅱ 中断</button><button id="resume" class="secondary">↻ 再開</button><button id="finish">✓ 完了</button><button id="reset" class="secondary">リセット</button></div><div id="result"><div><small>今回の実績時間（分）</small><br><strong id="minutes">0</strong></div><button id="copy">コピー</button></div><p id="notice" role="status"></p><details><summary>タスク名・記録の説明</summary><label for="task">作業タスク（任意）</label><input id="task" placeholder="例：レンズ磨き" maxlength="150"><p><small>「完了」で実績時間（分）を表示します。コピーしてNotionの新GTD Task DBの「実績時間（分）」に貼り付けてください。自動連携・認証キー入力はありません。</small></p></details></main>
 <script>
-(()=>{'use strict';
-const K='gtd-timer-v2',H='gtd-timer-history-v2',API='gtd-timer-api-v1',AUTH='gtd-timer-auth-v1',$=id=>document.getElementById(id),now=()=>Date.now();
-let s;try{s=JSON.parse(localStorage.getItem(K))}catch{};s=s&&typeof s==='object'?s:{mode:'idle',elapsed:0,startedAt:null,task:'',taskId:'',next:'',link:''};
-if(!['idle','running','paused'].includes(s.mode))s.mode='idle';if(!Number.isFinite(s.elapsed)||s.elapsed<0)s.elapsed=0;
-if(s.mode==='running'&&!Number.isFinite(s.startedAt))s.mode='paused';let hist=[];try{let x=JSON.parse(localStorage.getItem(H));if(Array.isArray(x))hist=x}catch{};
-$('task').value=s.task||'';$('next').value=s.next||'';$('link').value=s.link||'';$('api').value=localStorage.getItem(API)||'https://gtd-focus-timer-api.owlleather1.workers.dev';$('apiKey').value=localStorage.getItem(AUTH)||sessionStorage.getItem(AUTH)||'';$('rememberKey').checked=Boolean(localStorage.getItem(AUTH));
-function save(){s.task=$('task').value;s.next=$('next').value;s.link=$('link').value;localStorage.setItem(K,JSON.stringify(s));localStorage.setItem(API,$('api').value.trim())}
-function saveAuth(){const key=$('apiKey').value.trim();if($('rememberKey').checked){key?localStorage.setItem(AUTH,key):localStorage.removeItem(AUTH);sessionStorage.removeItem(AUTH)}else{key?sessionStorage.setItem(AUTH,key):sessionStorage.removeItem(AUTH);localStorage.removeItem(AUTH)}}
-function authHeaders(){const key=$('apiKey').value.trim();return key?{Authorization:'Bearer '+key}:{}}
-function seconds(){return Math.floor((s.elapsed+(s.mode==='running'?Math.max(0,now()-s.startedAt):0))/1000)}
-function fmt(t){return [Math.floor(t/3600),Math.floor(t%3600/60),t%60].map(n=>String(n).padStart(2,'0')).join(':')}
-function render(){const idle=s.mode==='idle';$('clock').textContent=fmt(seconds());$('state').textContent=s.mode==='running'?'集中中':s.mode==='paused'?'中断中':'待機中';$('start').disabled=!idle;$('pause').disabled=s.mode!=='running';$('resume').disabled=s.mode!=='paused';$('finish').disabled=idle;$('finish').textContent=idle?'✓ 記録（開始後）':'✓ 記録';$('recordGuide').textContent=idle?'①タスクを選択 → ②開始 → ③記録':'「✓ 記録」でローカル履歴とTask DBへ保存します';$('apiState').textContent=!$('api').value.trim()?'ローカル保存':$('apiKey').value.trim()?'Worker設定済み':'接続キー未設定'}
-function history(){const tb=$('history');tb.replaceChildren();hist.slice(-20).reverse().forEach(x=>{let tr=document.createElement('tr');[x.end,x.task,fmt(x.seconds),x.next].forEach(v=>{let td=document.createElement('td');td.textContent=v||'';tr.append(td)});tb.append(tr)})}
-function note(v){$('notice').textContent=v}
-function selectTask(){const o=$('taskSelect').selectedOptions[0];if(!o||!o.value)return; s.task=o.dataset.title||o.textContent;s.taskId=o.value;s.link=o.dataset.url||'';$('task').value=s.task;$('link').value=s.link;save();note('Task DBのタスクを選択しました')}
-async function loadTasks(){const base=$('api').value.trim().replace(/\/$/,'');if(!base){note('Worker URLを設定してください');return}if(!$('apiKey').value.trim()){note('Notion連携設定に接続キーを入力してください');return}note('Task DBを読み込み中…');try{const r=await fetch(base+'/tasks',{headers:{Accept:'application/json',...authHeaders()}});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(`Worker ${r.status}${data.status?` / Notion ${data.status}`:''}`);$('taskSelect').replaceChildren(new Option('手入力またはタスクを読み込む',''));(data.tasks||[]).forEach(x=>{const o=new Option(x.title,x.id);o.dataset.title=x.title;o.dataset.url=x.url||'';$('taskSelect').append(o)});$('apiState').textContent='Task DB接続済み';note(`${(data.tasks||[]).length}件読み込みました`)}catch(e){note(`Task DBを読み込めません（${e.message}）。接続キーとWorker設定を確認してください`)}}
-async function sendLog(end,secs){const base=$('api').value.trim().replace(/\/$/,'');if(!base||!s.taskId||!$('apiKey').value.trim())return false;const r=await fetch(base+'/log',{method:'POST',headers:{'Content-Type':'application/json',...authHeaders()},body:JSON.stringify({taskId:s.taskId,task:s.task,start:new Date(end-secs*1000).toISOString(),end:new Date(end).toISOString(),minutes:Math.round(secs/60*100)/100,note:s.next,taskUrl:s.link})});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(`Worker ${r.status}${data.status?` / Notion ${data.status}`:''}${data.error?` / ${data.error}`:''}`);return true}
-['task','next','link','api'].forEach(id=>$(id).addEventListener('input',()=>{save();render()}));$('apiKey').addEventListener('input',()=>{saveAuth();render()});$('rememberKey').addEventListener('change',()=>{saveAuth();render()});$('taskSelect').addEventListener('change',selectTask);$('loadTasks').onclick=loadTasks;
-$('start').onclick=()=>{if(!$('task').value.trim()){note('タスク名を入力またはTask DBから選択してください');return}s.mode='running';s.startedAt=now();s.elapsed=0;save();render();note('開始しました')};
-$('pause').onclick=()=>{s.elapsed+=Math.max(0,now()-s.startedAt);s.startedAt=null;s.mode='paused';save();render();note('中断しました')};$('resume').onclick=()=>{s.startedAt=now();s.mode='running';save();render();note('再開しました')};
-$('finish').onclick=async()=>{if(s.mode==='idle'){note('先にタスクを選び、「開始」を押してください');return}if(!confirm('作業時間を保存しますか？'))return;const end=now();if(s.mode==='running'){s.elapsed+=Math.max(0,end-s.startedAt);s.startedAt=null;s.mode='paused';save();render()}const secs=seconds(),item={end:new Date(end).toLocaleString('ja-JP'),iso:new Date(end).toISOString(),task:$('task').value.trim(),seconds:secs,next:$('next').value.trim(),link:$('link').value.trim()};const syncRequested=Boolean($('api').value.trim()&&s.taskId&&$('apiKey').value.trim());if(syncRequested){note('Task DBへ記録中…');try{await sendLog(end,secs)}catch(e){note(`Task DBへ記録できません（${e.message}）。設定を確認して、もう一度「記録」を押してください`);return}}hist.push(item);localStorage.setItem(H,JSON.stringify(hist));s={mode:'idle',elapsed:0,startedAt:null,task:'',taskId:'',next:'',link:''};$('task').value='';$('next').value='';$('link').value='';$('taskSelect').value='';save();render();history();note(syncRequested?'ローカル保存＋Task DBへ記録しました':'ローカルに保存しました（Task DBタスク未選択）')};
-$('reset').onclick=()=>{if(!confirm('現在の計測を破棄しますか？'))return;s.mode='idle';s.elapsed=0;s.startedAt=null;save();render();note('リセットしました')};
-$('csv').onclick=()=>{if(!hist.length){note('履歴がありません');return}const esc=x=>'"'+String(x??'').replaceAll('"','""')+'"';const rows=[['作業名','開始日時','終了日時','作業時間（分）','再開メモ','関連タスクURL'],...hist.map(x=>[x.task,new Date(new Date(x.iso).getTime()-x.seconds*1000).toISOString(),x.iso,Math.round(x.seconds/60*100)/100,x.next,x.link||''])];const url=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(esc).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='gtd-work-log.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);note('履歴をCSVに書き出しました')};render();history();setInterval(render,250)
-})();
-</script>
-</body>
-</html>
-
+(()=>{'use strict';const $=id=>document.getElementById(id),KEY='gtd-mini-timer-v1';let s;try{s=JSON.parse(localStorage.getItem(KEY))}catch{}if(!s||!['idle','running','paused'].includes(s.mode))s={mode:'idle',elapsed:0,startedAt:null,task:'',lastMinutes:null};if(!Number.isFinite(s.elapsed)||s.elapsed<0)s.elapsed=0;if(s.mode==='running'&&!Number.isFinite(s.startedAt))s.mode='paused';$('task').value=s.task||'';
+function save(){s.task=$('task').value;try{localStorage.setItem(KEY,JSON.stringify(s))}catch{}}
+function elapsed(){return s.elapsed+(s.mode==='running'?Math.max(0,Date.now()-s.startedAt):0)}
+function fmt(sec){return [Math.floor(sec/3600),Math.floor(sec%3600/60),sec%60].map(n=>String(n).padStart(2,'0')).join(':')}
+function notice(t){$('notice').textContent=t}
+function render(){const idle=s.mode==='idle';$('clock').textContent=fmt(Math.floor(elapsed()/1000));$('state').textContent=idle?'待機中':s.mode==='running'?'計測中':'中断中';$('start').disabled=!idle;$('pause').disabled=s.mode!=='running';$('resume').disabled=s.mode!=='paused';$('finish').disabled=idle;if(s.lastMinutes!==null&&Number.isFinite(s.lastMinutes)){$('result').style.display='flex';$('minutes').textContent=s.lastMinutes}else $('result').style.display='none'}
+$('task').oninput=save;$('start').onclick=()=>{s.mode='running';s.startedAt=Date.now();s.elapsed=0;s.lastMinutes=null;save();render();notice('計測を開始しました')};$('pause').onclick=()=>{s.elapsed=elapsed();s.startedAt=null;s.mode='paused';save();render();notice('中断しました')};$('resume').onclick=()=>{s.startedAt=Date.now();s.mode='running';save();render();notice('再開しました')};$('finish').onclick=()=>{if(!confirm('計測を完了しますか？'))return;const ms=elapsed();s.lastMinutes=+(ms/60000).toFixed(2);s.mode='idle';s.elapsed=0;s.startedAt=null;save();render();notice('実績時間をコピーしてNotionに貼り付けてください')};$('reset').onclick=()=>{if(!confirm('現在の計測を破棄しますか？'))return;s.mode='idle';s.elapsed=0;s.startedAt=null;s.lastMinutes=null;save();render();notice('リセットしました')};$('copy').onclick=async()=>{const value=String(s.lastMinutes);try{await navigator.clipboard.writeText(value);notice(value+' 分をコピーしました')}catch{const t=document.createElement('textarea');t.value=value;document.body.append(t);t.select();try{document.execCommand('copy');notice(value+' 分をコピーしました')}catch{notice('コピーできません。数字を手動でコピーしてください')}t.remove()}};render();setInterval(render,300)})();
+</script></body></html>
